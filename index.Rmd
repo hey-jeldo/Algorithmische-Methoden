@@ -1,7 +1,7 @@
 ---
-title: "Lösungen aus *Algorithmische Methoden*"
-runningheader: "Bearbeitung der Aufgabenblätter aus der Vorlesung" # only for pdf output
-subtitle: "Bearbeitung der Aufgabenblätter aus der Vorlesung" # only for html output
+title: "Arbeitsblätter: *Algorithmische Methoden*"
+runningheader: "Eine Bearbeitung im literal-programming-Stil in R Markdown" # only for pdf output
+subtitle: "Eine Bearbeitung im literal-programming-Stil in R Markdown" # only for html output
 author: "Jeldo Arno Meppen"
 date: "`r Sys.Date()`"
 monofont: Hack
