@@ -6,7 +6,8 @@ author: "Jeldo Arno Meppen"
 date: "`r Sys.Date()`"
 monofont: Hack
 output:
-  tufte::tufte_html: default
+  tufte::tufte_html:
+    highlight: kate
   tufte::tufte_handout:
     citation_package: natbib
     latex_engine: xelatex
@@ -96,11 +97,111 @@ print(*result)
 
 ## Aufgabe 2.1
 
-> Wir bauen uns ein Korpus:
+1. Wählen Sie mindestens 4 Online-Artikel aus, die aus unterschiedlichen Zeitungsportalen stammen oder unterschiedlichen Genres zuzurechnen sind.
+2. Speichern Sie diese Artikel anschließend als reine Textdateien (Kodierung: UTF-8).
+3. Erzeugen Sie ein Korpus, das diese Texte enthält (PlaintextCorpusReader).
 
-- Wählen Sie mindestens 4 Online-Artikel aus, die aus unterschiedlichen Zei-
-tungsportalen stammen oder unterschiedlichen Genres zuzurechnen sind.
-Speichern Sie diese Artikel anschließend als reine Textdateien (Kodierung: UTF-8).
-- Erzeugen Sie ein Korpus, das diese Texte enthält (PlaintextCorpusReader).
+```{python}
+corpus_dir = os.getcwd() + "/data"
+corpus_texts = ".+\.txt"
+mein_korpus = PlaintextCorpusReader(corpus_dir, corpus_texts, encoding='utf-8')
+print(mein_korpus.fileids())
+```
 
-vcbnnfdhfdhfhdfhfdh
+## Aufgabe 2.2.1
+
+> Berechnen Sie die Länge in Token und den Vokabularumfang (Types).
+
+```{python}
+corpus_dict = {
+    "Trump" : mein_korpus.words('trump.txt'),
+    "Rapper" : mein_korpus.words('bushido.txt'),
+    "Corbyn" : mein_korpus.words('corbyn.txt'),
+    "Corona" : mein_korpus.words('corona.txt')
+}
+all = corpus_dict["Trump"]
+all += corpus_dict["Rapper"]
+all += corpus_dict["Corbyn"]
+all += corpus_dict["Corona"]
+corpus_dict.update({'Korpus' : all})
+for text in corpus_dict:
+    print(text + ':', '\tLänge:', len(corpus_dict[text]), '\tUmfang:', len(set(corpus_dict[text])))
+```
+
+```{python}
+for text in corpus_dict:
+    fd = nltk.FreqDist(corpus_dict[text])
+    print(text + ':', fd.most_common(10), '\n')
+```
+
+```{python}
+for text in corpus_dict:
+    fd = nltk.FreqDist(corpus_dict[text])
+    print(text + ':')
+    fd.plot(10, cumulative=True)
+```
+
+# Arbeitsblatt 3
+
+## Aufgabe 3.1
+
+## Aufgabe 3.2
+
+## Aufgabe 3.3
+
+
+---
+
+# Arbeitsblatt 4
+
+## Aufgabe 4.1
+
+> Definieren Sie eine Funktion `stamm_erweiterung`, die einen Wortstamm $w$ und eine Liste $L$ von Wörtern/Token als Argumente nimmt und als Wert eine Liste von Wörtern aus $L$ liefert, die den Stamm $w$ enthalten.
+
+```{python}
+def stamm_erweiterung(wortstamm, liste):
+    ergebnis = []
+    for wort in liste:
+        if wortstamm in wort:
+            ergebnis.append(wort)
+    return ergebnis
+```
+
+```{python}
+stamm_erweiterung("impf", mein_korpus.words('corona.txt'))
+```
+## Aufgabe 4.2
+
+> Definieren Sie eine Funktion sprach_identifikation, die einen Text bzw. Korpus
+als Argument nimmt und feststellt, in welcher Sprache er geschrieben ist.
+Die Funktion soll dazu die in NLTK für verschiedene Sprachen definierten Stop- wortlisten verwenden und als Wert die Sprache ausgeben, für die der Text die größte Trefferzahl (enthaltene Stopwörter) aufweist.
+
+```{python}
+from nltk.corpus import stopwords
+```
+
+```{python}
+def sprach_vergleich(text, sprache):
+    stopwort_treffer = []
+    for wort in text:
+        if wort in stopwords.words(sprache):
+            stopwort_treffer.append(wort)
+    return len(stopwort_treffer)
+```
+
+```{python}
+def sprach_identifikation(text):
+    treffermenge = {}
+    for sprache in stopwords.fileids():
+        länge = sprach_vergleich(text, sprache)
+        treffermenge[sprache] = länge
+    sortiert = sorted(treffermenge, key=treffermenge.get)
+    return sortiert[-1]
+```
+
+```{python}
+sprach_identifikation(mein_korpus.words('biden-iraq.txt'))
+sprach_identifikation(mein_korpus.words('corona.txt'))
+sprach_identifikation(mein_korpus.words('turk.txt'))
+```
+
