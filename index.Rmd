@@ -1,11 +1,13 @@
 ---
-title: "Arbeitsblätter: *Algorithmische Methoden*"
-runningheader: "Eine Bearbeitung im literal-programming-Stil in R Markdown" # only for pdf output
-subtitle: "Eine Bearbeitung im literal-programming-Stil in R Markdown" # only for html output
+title: 'Arbeitsblätter: *Algorithmische Methoden*'
 author: "Jeldo Arno Meppen"
 date: "`r Sys.Date()`"
-monofont: Hack
 output:
+  html_document:
+    df_print: paged
+  pdf_document:
+    latex_engine: xelatex
+    highlight: zenburn
   tufte::tufte_html:
     highlight: kate
   tufte::tufte_handout:
@@ -14,7 +16,9 @@ output:
   tufte::tufte_book:
     citation_package: natbib
     latex_engine: xelatex
-  beamer: default
+subtitle: Eine Bearbeitung im literal-programming-Stil in R Markdown
+monofont: Hack
+runningheader: Eine Bearbeitung im literal-programming-Stil in R Markdown
 ---
 
 ```{r setup, include=FALSE}
@@ -36,7 +40,6 @@ Um alle uns gestellten Aufgaben lösen zu können, bedarf es des `import`s versc
 import os
 import re
 import nltk
-from nltk.corpus import PlaintextCorpusReader
 import matplotlib
 ```
 
@@ -65,7 +68,7 @@ print(f"Heute ist der {date}, oder ISO: {year}-{month}-{day}")
 
 ```{python}
 rhyme = '''
-Betty bought a bit of butter, But the butter was so bitter, 
+Betty bought a bit of butter, But the butter was so bitter,
 So she bought some better butter, To make the bitter butter better.'''
 print(re.findall("[Bb]\w+", rhyme))
 ```
@@ -102,17 +105,26 @@ print(*result)
 3. Erzeugen Sie ein Korpus, das diese Texte enthält (PlaintextCorpusReader).
 
 ```{python}
+from nltk.corpus import PlaintextCorpusReader
+```
+
+```{python}
 corpus_dir = os.getcwd() + "/data"
 corpus_texts = ".+\.txt"
 mein_korpus = PlaintextCorpusReader(corpus_dir, corpus_texts, encoding='utf-8')
 print(mein_korpus.fileids())
 ```
 
+---
+
 # Arbeitsblatt 4
 
 ## Aufgabe 4.1
 
 > Definieren Sie eine Funktion `stamm_erweiterung`, die einen Wortstamm $w$ und eine Liste $L$ von Wörtern/Token als Argumente nimmt und als Wert eine Liste von Wörtern aus $L$ liefert, die den Stamm $w$ enthalten.
+
+Wir definieren die Funktion, die und erstellen eine leere Liste `ergebnis`.
+Für jedes Wort in der Liste $L$ wird geprüft ob der Wortstamm $w$ enthalten ist und bei übereinstimmen an die Liste `ergebnis` angehängt. Diese wird dann zurückgegeben.
 
 ```{python}
 def stamm_erweiterung(wortstamm, liste):
@@ -123,41 +135,105 @@ def stamm_erweiterung(wortstamm, liste):
     return ergebnis
 ```
 
+- Ein Test mit Wortstamm `"impf"` und einem Text über Corona.
+
 ```{python}
 stamm_erweiterung("impf", mein_korpus.words('corona.txt'))
 ```
+
 ## Aufgabe 4.2
 
 > Definieren Sie eine Funktion sprach_identifikation, die einen Text bzw. Korpus
 als Argument nimmt und feststellt, in welcher Sprache er geschrieben ist.
-Die Funktion soll dazu die in NLTK für verschiedene Sprachen definierten Stop- wortlisten verwenden und als Wert die Sprache ausgeben, für die der Text die größte Trefferzahl (enthaltene Stopwörter) aufweist.
+Die Funktion soll dazu die in NLTK für verschiedene Sprachen definierten Stopwortlisten verwenden und als Wert die Sprache ausgeben, für die der Text die größte Trefferzahl (enthaltene Stopwörter) aufweist.
+
+Zu erst müssen die Stopwortlisten aus `NLTK` importiert werden.
 
 ```{python}
 from nltk.corpus import stopwords
 ```
 
-```{python}
-def sprach_vergleich(text, sprache):
-    stopwort_treffer = []
-    for wort in text:
-        if wort in stopwords.words(sprache):
-            stopwort_treffer.append(wort)
-    return len(stopwort_treffer)
-```
+Zunächst definieren wir die Funktion `stopwort_anzahl()` mit den Parametern `text` und `sprache`.
+Diese geht über jedes Wort im gefütterten `text` und prüft ob es in der Stopwortliste der spezifizierten `sprache` ist. Bei Übereinstimmen legt sie das Stopwort in einer Liste `treffer` ab und gibt schliesslich deren Länge zurück.
 
 ```{python}
-def sprach_identifikation(text):
+def stopwort_anzahl(text, sprache):
+    treffer = []
+    for wort in text:
+        if wort in stopwords.words(sprache):
+            treffer.append(wort)
+    return len(treffer)
+```
+
+In einem zweiten Schritt definieren wir die Funktion `test_lang()` die nur einen `text` als Parameter nimmt.
+Sie iteriert über jede Sprache im importierten `stopwords`-Korpus und fügt diese zusammen mit `text` in  die oben definierte Funktion `stopwort_anzahl()` ein und legt das dort zurückgegebene Ergebnis als Wert in ein Wörterbuch ab und weißt es dem Schlüssel der jeweiligen Sprache zu.
+Dieses Wörterbuch `treffermenge` wird dann so sortiert, dass am Schluss der Schlüssel bzw. die Sprache mit der höchsten Trefferquote zurückgegeben wird.
+
+```{python}
+def test_lang(text):
     treffermenge = {}
     for sprache in stopwords.fileids():
-        länge = sprach_vergleich(text, sprache)
-        treffermenge[sprache] = länge
+        treffermenge[sprache] = stopwort_anzahl(text, sprache)
     sortiert = sorted(treffermenge, key=treffermenge.get)
     return sortiert[-1]
 ```
 
+Im letzten Teil schliesslich definieren wir unsere finale Funktion. Sie überprüft nur noch ob ein Text oder ein Korpus gefüttert wurde und lässt für einen Text einfach unsere `test_lang()` laufen und legt im Falle eines Korpus ein Wörterbuch an, in dem die Ergebnisse von `test_lang()` für jeden Text des Korpus abgelegt werden. Dieses Wörterbuch `wb` wird schliesslich zurückgegeben.
+
 ```{python}
-sprach_identifikation(mein_korpus.words('biden-iraq.txt'))
-sprach_identifikation(mein_korpus.words('corona.txt'))
-sprach_identifikation(mein_korpus.words('turk.txt'))
+def sprach_identifikation(text):
+    wb = {}
+    if isinstance(text, nltk.corpus.reader.plaintext.PlaintextCorpusReader):
+        for item in text.fileids():
+            wb[item] = test_lang(mein_korpus.words(item))
+        return wb
+    return test_lang(text)
 ```
 
+- Ein Test für einen Text und jeden Text im Korpus
+
+```{python}
+sprach_identifikation(mein_korpus.words('turk.txt'))
+sprach_identifikation(mein_korpus)
+```
+
+# Aufgabe 4.3
+
+> Definieren Sie die Funktion inhaltswörter, die für einen Text oder ein Korpus einer Sprache eine Liste mit den n (Standardwert: 10) wichtigsten Inhaltswörtern ausgibt. Ein Inhaltswort ist ein Wort (und kein Satz-, Anführungszeichen oder Klammersymbol), das nicht in der Stopwortliste dieser Sprache vorkommt. Seine Wichtigkeit wird durch seine Frequenz im Text bestimmt.
+Die Funktion kann also mit 1-3 Argumenten aufgerufen werden.
+
+Wir definieren `inhaltswoerter()` und Verlangen die Parameter `text` sowie `sprache` mit Defaultwert Deutsch und `anzahl` mit Default 10.
+Wenn die Funktion einen Korpus gefüttert bekommt, legt sie ein Wörterbuch an und ruft sich selbst (rekursiv! :-) für jeden Text im Korpus auf und gibt alle Ergebnosse als Wörterbuch zurück.
+Erkennt die Funktion einen Text entfernt sie Stoppworte der `sprache`. (Hier passiert noch ein wenig Magie um Sonderzeichen und auch großgeschriebene Stoppworte zu erfassen.)
+Schliesslich gibt Sie eine Häufigkeitsverteilung der `anzahl` häufigsten Wörter zurück.
+
+```{python}
+def inhaltswoerter(text, sprache="german", anzahl=10):
+    wb = {}
+    if isinstance(text, nltk.corpus.reader.plaintext.PlaintextCorpusReader):
+        for item in text.fileids():
+            wb[item] = inhaltswoerter(mein_korpus.words(item))
+        return wb
+    textl = list(text)
+    stopwort_liste = stopwords.words(sprache)
+    stopworte_title = []
+    for stopwort in stopwort_liste:
+        stopworte_title.append(stopwort.title())
+    stopwort_liste += stopworte_title
+    stopwort_liste += [".", ",", "?", "!", "-", ";" , "–", '"', ":", "’", "„"]
+    for stopwort in stopwort_liste:
+        if stopwort in textl:
+            while stopwort in textl:
+                textl.remove(stopwort)
+    fd = nltk.FreqDist(textl)
+    return fd.most_common(anzahl)
+```
+
+- Testen mit verschiedenen Argumenten:
+
+```{python}
+inhaltswoerter(mein_korpus.words('corona.txt'))
+inhaltswoerter(mein_korpus.words('biden-iraq.txt'), "english")
+inhaltswoerter(mein_korpus.words('turk.txt'), "turkish" , 5)
+inhaltswoerter(mein_korpus)
+```
