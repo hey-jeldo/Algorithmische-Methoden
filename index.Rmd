@@ -226,7 +226,10 @@ def inhaltswoerter(text, sprache="german", anzahl=10):
             while stopwort in textl:
                 textl.remove(stopwort)
     fd = nltk.FreqDist(textl)
-    return fd.most_common(anzahl)
+    tl = []
+    for tuple in fd.most_common(anzahl):
+        tl.append(tuple[0])
+    return tl
 ```
 
 - Testen mit verschiedenen Argumenten:

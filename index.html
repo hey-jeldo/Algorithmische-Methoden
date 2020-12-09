@@ -360,18 +360,21 @@ print(mein_korpus.fileids())</code></pre>
             while stopwort in textl:
                 textl.remove(stopwort)
     fd = nltk.FreqDist(textl)
-    return fd.most_common(anzahl)</code></pre>
+    tl = []
+    for tuple in fd.most_common(anzahl):
+        tl.append(tuple[0])
+    return tl</code></pre>
 <ul>
 <li>Testen mit verschiedenen Argumenten:</li>
 </ul>
 <pre class="python"><code>inhaltswoerter(mein_korpus.words(&#39;corona.txt&#39;))</code></pre>
-<pre><code>## [(&#39;Impfstoffe&#39;, 5), (&#39;bald&#39;, 4), (&#39;erste&#39;, 4), (&#39;Impfstoff&#39;, 4), (&#39;SPIEGEL&#39;, 3), (&#39;Sahin&#39;, 3), (&#39;schützen&#39;, 3), (&#39;Wochen&#39;, 3), (&#39;Monate&#39;, 3), (&#39;viele&#39;, 3)]</code></pre>
+<pre><code>## [&#39;Impfstoffe&#39;, &#39;bald&#39;, &#39;erste&#39;, &#39;Impfstoff&#39;, &#39;SPIEGEL&#39;, &#39;Sahin&#39;, &#39;schützen&#39;, &#39;Wochen&#39;, &#39;Monate&#39;, &#39;viele&#39;]</code></pre>
 <pre class="python"><code>inhaltswoerter(mein_korpus.words(&#39;biden-iraq.txt&#39;), &quot;english&quot;)</code></pre>
-<pre><code>## [(&#39;Austin&#39;, 27), (&#39;General&#39;, 27), (&#39;American&#39;, 14), (&#39;military&#39;, 10), (&#39;would&#39;, 10), (&#39;Mr&#39;, 10), (&#39;Iraq&#39;, 8), (&#39;first&#39;, 8), (&#39;Pentagon&#39;, 7), (&#39;forces&#39;, 7)]</code></pre>
+<pre><code>## [&#39;Austin&#39;, &#39;General&#39;, &#39;American&#39;, &#39;military&#39;, &#39;would&#39;, &#39;Mr&#39;, &#39;Iraq&#39;, &#39;first&#39;, &#39;Pentagon&#39;, &#39;forces&#39;]</code></pre>
 <pre class="python"><code>inhaltswoerter(mein_korpus.words(&#39;turk.txt&#39;), &quot;turkish&quot; , 5)</code></pre>
-<pre><code>## [(&#39;Zeynep&#39;, 10), (&#39;Murat&#39;, 8), (&#39;var&#39;, 7), (&#39;bir&#39;, 6), (&#39;tarihi&#39;, 5)]</code></pre>
+<pre><code>## [&#39;Zeynep&#39;, &#39;Murat&#39;, &#39;var&#39;, &#39;bir&#39;, &#39;tarihi&#39;]</code></pre>
 <pre class="python"><code>inhaltswoerter(mein_korpus)</code></pre>
-<pre><code>## {&#39;biden-iraq.txt&#39;: [(&#39;the&#39;, 111), (&#39;of&#39;, 48), (&#39;to&#39;, 39), (&#39;Austin&#39;, 27), (&#39;General&#39;, 27), (&#39;and&#39;, 27), (&#39;a&#39;, 25), (&#39;that&#39;, 19), (&#39;for&#39;, 16), (&#39;s&#39;, 15)], &#39;bushido.txt&#39;: [(&#39;Bushido&#39;, 15), (&#39;Abou&#39;, 13), (&#39;Chaker&#39;, 11), (&#39;Treffen&#39;, 5), (&#39;2017&#39;, 4), (&#39;Mittwoch&#39;, 4), (&#39;Rapper&#39;, 3), (&#39;Arafat&#39;, 3), (&#39;bedroht&#39;, 3), (&#39;sagte&#39;, 3)], &#39;corbyn.txt&#39;: [(&#39;Corbyn&#39;, 5), (&#39;Labour&#39;, 3), (&#39;Jeremy&#39;, 2), (&#39;Labourpartei&#39;, 2), (&#39;drin&#39;, 2), (&#39;Dienstag&#39;, 2), (&#39;EHRC&#39;, 2), (&#39;Suspendierung&#39;, 2), (&#39;Erst&#39;, 1), (&#39;draußen&#39;, 1)], &#39;corona.txt&#39;: [(&#39;Impfstoffe&#39;, 5), (&#39;bald&#39;, 4), (&#39;erste&#39;, 4), (&#39;Impfstoff&#39;, 4), (&#39;SPIEGEL&#39;, 3), (&#39;Sahin&#39;, 3), (&#39;schützen&#39;, 3), (&#39;Wochen&#39;, 3), (&#39;Monate&#39;, 3), (&#39;viele&#39;, 3)], &#39;stoppworte.txt&#39;: [(&#39;ab&#39;, 1), (&#39;abgesehen&#39;, 1), (&#39;allein&#39;, 1), (&#39;anderenfalls&#39;, 1), (&#39;anstatt&#39;, 1), (&#39;aussen&#39;, 1), (&#39;außen&#39;, 1), (&#39;ausser&#39;, 1), (&#39;außer&#39;, 1), (&#39;ausserdem&#39;, 1)], &#39;trump.txt&#39;: [(&#39;Trump&#39;, 24), (&#39;Biden&#39;, 21), (&#39;Duell&#39;, 7), (&#39;schon&#39;, 7), (&#39;Bidens&#39;, 7), (&#39;Hunter&#39;, 7), (&#39;TV&#39;, 6), (&#39;Trumps&#39;, 6), (&#39;Sohn&#39;, 6), (&#39;Joe&#39;, 5)], &#39;turk.txt&#39;: [(&#39;ve&#39;, 14), (&#39;Zeynep&#39;, 10), (&#39;Murat&#39;, 8), (&#39;var&#39;, 7), (&#39;bir&#39;, 6), (&#39;tarihi&#39;, 5), (&#39;çok&#39;, 5), (&#39;“&#39;, 5), (&#39;daha&#39;, 4), (&#39;Ayasofya&#39;, 3)]}</code></pre>
+<pre><code>## {&#39;biden-iraq.txt&#39;: [&#39;the&#39;, &#39;of&#39;, &#39;to&#39;, &#39;Austin&#39;, &#39;General&#39;, &#39;and&#39;, &#39;a&#39;, &#39;that&#39;, &#39;for&#39;, &#39;s&#39;], &#39;bushido.txt&#39;: [&#39;Bushido&#39;, &#39;Abou&#39;, &#39;Chaker&#39;, &#39;Treffen&#39;, &#39;2017&#39;, &#39;Mittwoch&#39;, &#39;Rapper&#39;, &#39;Arafat&#39;, &#39;bedroht&#39;, &#39;sagte&#39;], &#39;corbyn.txt&#39;: [&#39;Corbyn&#39;, &#39;Labour&#39;, &#39;Jeremy&#39;, &#39;Labourpartei&#39;, &#39;drin&#39;, &#39;Dienstag&#39;, &#39;EHRC&#39;, &#39;Suspendierung&#39;, &#39;Erst&#39;, &#39;draußen&#39;], &#39;corona.txt&#39;: [&#39;Impfstoffe&#39;, &#39;bald&#39;, &#39;erste&#39;, &#39;Impfstoff&#39;, &#39;SPIEGEL&#39;, &#39;Sahin&#39;, &#39;schützen&#39;, &#39;Wochen&#39;, &#39;Monate&#39;, &#39;viele&#39;], &#39;stoppworte.txt&#39;: [&#39;ab&#39;, &#39;abgesehen&#39;, &#39;allein&#39;, &#39;anderenfalls&#39;, &#39;anstatt&#39;, &#39;aussen&#39;, &#39;außen&#39;, &#39;ausser&#39;, &#39;außer&#39;, &#39;ausserdem&#39;], &#39;trump.txt&#39;: [&#39;Trump&#39;, &#39;Biden&#39;, &#39;Duell&#39;, &#39;schon&#39;, &#39;Bidens&#39;, &#39;Hunter&#39;, &#39;TV&#39;, &#39;Trumps&#39;, &#39;Sohn&#39;, &#39;Joe&#39;], &#39;turk.txt&#39;: [&#39;ve&#39;, &#39;Zeynep&#39;, &#39;Murat&#39;, &#39;var&#39;, &#39;bir&#39;, &#39;tarihi&#39;, &#39;çok&#39;, &#39;“&#39;, &#39;daha&#39;, &#39;Ayasofya&#39;]}</code></pre>
 </div>
 
 
