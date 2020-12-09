@@ -1,0 +1,229 @@
+* Vorbereitungen
+
+Um alle uns gestellten Aufgaben lösen zu können, bedarf es des ~import~ verschiedener Python-Bibliotheken oder Module. Für uns besonders wichtig sind ~re~ für *reguläre Ausdrücke*, ~nltk~ für *Verarbeitung natürlicher Sprache* und ~matplotlib~ für das Erstellen mathematischer Darstellungen wie *Graphen*.
+
+#+begin_src python
+import os
+import re
+import nltk
+import matplotlib
+#+end_src
+
+* Aufgabenblatt 1
+** DONE Aufgabe 1.1
+
+#+begin_quote
+Weisen Sie einer Variable die Zeichenkette ~”Trier, den 3.11.2020\nMit freundliche Grüßen”~ zu und geben Sie einen regulären Ausdruck an, der das vollständige Datum extrahiert.
+Können Sie mit dem von Ihnen gewählten regulären Ausdruck jeweils auch die Tages-, Monats- und Jahresangabe extrahieren?
+#+end_quote
+
+#+begin_src python
+ort_datum = "Trier, den 3.11.2020\nMit freundliche Grüßen"
+result = re.search("((\d+)[./-](\d+)[./-](\d+))", ort_datum)
+# [./-] hilft bei MM/DD/YY oder YYYY-MM-DD
+date = result.group(1)
+day = result.group(2)
+month = result.group(3)
+year = result.group(4)
+print(f"Heute ist der {date}, oder ISO: {year}-{month}-{day}")
+# gilt nur für DDMMYY(YY)
+#+end_src
+
+** DONE Aufgabe 1.2
+
+#+begin_quote
+Weisen Sie einer Variable die Zeichenkette ~"Betty bought a bit of butter, But the butter was so bitter, So she bought some better butter, To make the bitter butter better."~ zu und geben Sie einen regulären Ausdruck an, der alle Wörter extrahiert, die mit ~"b"~ oder ~"B"~ beginnen.
+#+end_quote
+
+#+begin_src python
+rhyme = '''
+Betty bought a bit of butter, But the butter was so bitter,
+So she bought some better butter, To make the bitter butter better.'''
+print(re.findall("[Bb]\w+", rhyme))
+#+end_src
+
+** DONE Aufgabe 1.3
+
+#+begin_quote
+Geben Sie einen regulären Ausdruck an, der aus einem Text, der eine Email-Adresse enhält diese Email-Adresse extrahiert.
+Achten Sie darauf, dass Sie auch auf die user-id, die Domäne und den Suffix zugreifen können.
+#+end_quote
+
+#+begin_src python
+emails = "test.acc+uni@g-mail.co.jp, notme@hey.com"
+result = re.findall("(([\w\.\-]+)\+?[\w]*@([\w\-]+)(\.[\w]+\.?[\w]*))", emails)
+for mail in result:
+  print(mail)
+#+end_src
+
+** DONE Aufgabe 1.4
+
+#+begin_quote
+Gegeben sei eine Zeichenkette, die unnötige Leerzeichen, Tabs und überflüssige Interpunktionszeichen enthält.
+Geben Sie einen Ausdruck an, der diese Zeichen entfernt.
+#+end_quote
+
+#+begin_src python
+text = "     Dieser,     Anblick   spottet;    jeder  Beschreibung,!   "
+result = re.findall("([^\s,;]+)", text)
+print(*result)
+#+end_src
+
+* Aufgabenblatt 2
+** DONE Aufgabe 2.1
+
+#+begin_quote
+1. Wählen Sie mindestens 4 Online-Artikel aus, die aus unterschiedlichen Zeitungsportalen stammen oder unterschiedlichen Genres zuzurechnen sind.
+2. Speichern Sie diese Artikel anschließend als reine Textdateien (Kodierung: UTF-8).
+3. Erzeugen Sie ein Korpus, das diese Texte enthält (PlaintextCorpusReader).
+#+end_quote
+
+#+begin_src python
+from nltk.corpus import PlaintextCorpusReader
+#+end_src
+
+#+begin_src python
+corpus_dir = os.getcwd() + "/data"
+corpus_texts = ".+\.txt"
+mein_korpus = PlaintextCorpusReader(corpus_dir, corpus_texts, encoding='utf-8')
+print(mein_korpus.fileids())
+#+end_src
+
+---
+
+** TODO Aufgabe 2.2
+** TODO Aufgabe 2.3
+* Aufgabenblatt 3
+** TODO Aufgabe 3.1
+** TODO Aufgabe 3.2
+** TODO Aufgabe 3.3
+* Aufgabenblatt 4
+** DONE Aufgabe 4.1
+
+#+begin_quote
+Definieren Sie eine Funktion ~stamm_erweiterung~, die einen Wortstamm $w$ und eine Liste $L$ von Wörtern/Token als Argumente nimmt und als Wert eine Liste von Wörtern aus $L$ liefert, die den Stamm $w$ enthalten.
+#+end_quote
+
+Wir definieren die Funktion, die und erstellen eine leere Liste ~ergebnis~.
+Für jedes Wort in der Liste $L$ wird geprüft ob der Wortstamm $w$ enthalten ist und bei übereinstimmen an die Liste ~ergebnis~ angehängt. Diese wird dann zurückgegeben.
+
+#+begin_src python
+def stamm_erweiterung(wortstamm, liste):
+    ergebnis = []
+    for wort in liste:
+        if wortstamm in wort:
+            ergebnis.append(wort)
+    return ergebnis
+#+end_src
+
+Ein Test mit Wortstamm ~"impf"~ und einem Text über Corona.
+
+#+begin_src python
+stamm_erweiterung("impf", mein_korpus.words('corona.txt'))
+#+end_src
+
+** DONE Aufgabe 4.2
+
+#+begin_quote
+Definieren Sie eine Funktion ~sprach_identifikation()~, die einen Text bzw. Korpus als Argument nimmt und feststellt, in welcher Sprache er geschrieben ist.
+Die Funktion soll dazu die in NLTK für verschiedene Sprachen definierten Stopwortlisten verwenden und als Wert die Sprache ausgeben, für die der Text die größte Trefferzahl (enthaltene Stopwörter) aufweist.
+#+end_quote
+
+Zu erst müssen die Stopwortlisten aus ~NLTK~ importiert werden.
+
+#+begin_src python
+from nltk.corpus import stopwords
+#+end_src
+
+Zunächst definieren wir die Funktion ~stopwort_anzahl()~ mit den Parametern ~text~ und ~sprache~.
+Diese geht über jedes Wort im gefütterten ~text~ und prüft ob es in der Stopwortliste der spezifizierten ~sprache~ ist. Bei Übereinstimmen legt sie das Stopwort in einer Liste ~treffer~ ab und gibt schliesslich deren Länge zurück.
+
+#+begin_src python
+def stopwort_anzahl(text, sprache):
+    treffer = []
+    for wort in text:
+        if wort in stopwords.words(sprache):
+            treffer.append(wort)
+    return len(treffer)
+#+end_src
+
+In einem zweiten Schritt definieren wir die Funktion ~test_lang()~ die nur einen ~text~ als Parameter nimmt.
+Sie iteriert über jede Sprache im importierten ~stopwords~-Korpus und fügt diese zusammen mit ~text~ in  die oben definierte Funktion ~stopwort_anzahl()~ ein und legt das dort zurückgegebene Ergebnis als Wert in ein Wörterbuch ab und weißt es dem Schlüssel der jeweiligen Sprache zu.
+Dieses Wörterbuch ~treffermenge~ wird dann so sortiert, dass am Schluss der Schlüssel bzw. die Sprache mit der höchsten Trefferquote zurückgegeben wird.
+
+#+begin_src python
+def test_lang(text):
+    treffermenge = {}
+    for sprache in stopwords.fileids():
+        treffermenge[sprache] = stopwort_anzahl(text, sprache)
+    sortiert = sorted(treffermenge, key=treffermenge.get)
+    return sortiert[-1]
+#+end_src
+
+Im letzten Teil schliesslich definieren wir unsere finale Funktion. Sie überprüft nur noch ob ein Text oder ein Korpus gefüttert wurde und lässt für einen Text einfach unsere ~test_lang()~ laufen und legt im Falle eines Korpus ein Wörterbuch an, in dem die Ergebnisse von ~test_lang()~ für jeden Text des Korpus abgelegt werden. Dieses Wörterbuch ~wb~ wird schliesslich zurückgegeben.
+
+#+begin_src python
+def sprach_identifikation(text):
+    wb = {}
+    if isinstance(text, nltk.corpus.reader.plaintext.PlaintextCorpusReader):
+        for item in text.fileids():
+            wb[item] = test_lang(mein_korpus.words(item))
+        return wb
+    return test_lang(text)
+#+end_src
+
+Ein Test für einen Text und jeden Text im Korpus
+
+#+begin_src python
+sprach_identifikation(mein_korpus.words('turk.txt'))
+sprach_identifikation(mein_korpus)
+#+end_src
+
+** DONE Aufgabe 4.3
+
+#+begin_quote
+Definieren Sie die Funktion ~inhaltswörter()~, die für einen Text oder ein Korpus einer Sprache eine Liste mit den n (Standardwert: 10) wichtigsten Inhaltswörtern ausgibt. Ein Inhaltswort ist ein Wort (und kein Satz-, Anführungszeichen oder Klammersymbol), das nicht in der Stopwortliste dieser Sprache vorkommt. Seine Wichtigkeit wird durch seine Frequenz im Text bestimmt.
+Die Funktion kann also mit 1-3 Argumenten aufgerufen werden.
+#+end_quote
+
+Wir definieren ~inhaltswoerter()~ und Verlangen die Parameter ~text~ sowie ~sprache~ mit Defaultwert Deutsch und ~anzahl~ mit Default 10.
+Wenn die Funktion einen Korpus gefüttert bekommt, legt sie ein Wörterbuch an und ruft sich selbst (rekursiv! :-) für jeden Text im Korpus auf und gibt alle Ergebnosse als Wörterbuch zurück.
+Erkennt die Funktion einen Text entfernt sie Stoppworte der ~sprache~. (Hier passiert noch ein wenig Magie um Sonderzeichen und auch großgeschriebene Stoppworte zu erfassen.)
+Schliesslich gibt Sie eine Häufigkeitsverteilung der ~anzahl~ häufigsten Wörter zurück.
+
+#+begin_src python
+def inhaltswoerter(text, sprache="german", anzahl=10):
+    wb = {}
+    if isinstance(text, nltk.corpus.reader.plaintext.PlaintextCorpusReader):
+        for item in text.fileids():
+            wb[item] = inhaltswoerter(mein_korpus.words(item))
+        return wb
+    textl = list(text)
+    stopwort_liste = stopwords.words(sprache)
+    stopworte_title = []
+    for stopwort in stopwort_liste:
+        stopworte_title.append(stopwort.title())
+    stopwort_liste += stopworte_title
+    stopwort_liste += [".", ",", "?", "!", "-", ";" , "–", '"', ":", "’", "„"]
+    for stopwort in stopwort_liste:
+        if stopwort in textl:
+            while stopwort in textl:
+                textl.remove(stopwort)
+    fd = nltk.FreqDist(textl)
+    tl = []
+    for tuple in fd.most_common(anzahl):
+        tl.append(tuple[0])
+    return tl
+#+end_src
+
+- Testen mit verschiedenen Argumenten:
+
+#+begin_src python
+inhaltswoerter(mein_korpus.words('corona.txt'))
+inhaltswoerter(mein_korpus.words('biden-iraq.txt'), "english")
+inhaltswoerter(mein_korpus.words('turk.txt'), "turkish" , 5)
+inhaltswoerter(mein_korpus)
+#+end_src
+
+* Aufgabenblatt 5
+** TODO Aufgabe 5.1
