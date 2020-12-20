@@ -1,13 +1,30 @@
+#+title: Aufgabenblätter Algorithmische Methoden
+#+author: Jeldo Arno Meppen
+#+email: jeldo@hey.com
+#+date: [2020-12-13 Sun]
+#+property: header-args :tangle yes
+#+options: todo:nil toc:nil
+#+html_head: <link rel="stylesheet" href="tufte.css" type="text/css" />
+#+latex_header:\hypersetup{hidelinks}
+#+latex_header:\usepackage{fontspec}
+#+latex_header:\setmonofont[Scale = 0.9]{Hack}
+#+latex_header:\setmainfont{Palatino}
+#+latex_header:\usemintedstyle{lovelace}
+
+
+
 * Vorbereitungen
 
-Um alle uns gestellten Aufgaben lösen zu können, bedarf es des ~import~ verschiedener Python-Bibliotheken oder Module. Für uns besonders wichtig sind ~re~ für *reguläre Ausdrücke*, ~nltk~ für *Verarbeitung natürlicher Sprache* und ~matplotlib~ für das Erstellen mathematischer Darstellungen wie *Graphen*.
+Um alle uns gestellten Aufgaben lösen zu können, bedarf es des ~import~ verschiedener Python-Bibliotheken oder Module. Für uns besonders wichtig sind ~re~ für *reguläre Ausdrücke*, ~nltk~ und  für *Verarbeitung natürlicher Sprache* und ~matplotlib~ für das Erstellen mathematischer Darstellungen wie *Graphen*.
 
 #+begin_src python
-import os
-import re
-import nltk
-import matplotlib
+  import os
+  import re
+  import nltk
+  import matplotlib
 #+end_src
+
+#+RESULTS:
 
 * Aufgabenblatt 1
 ** DONE Aufgabe 1.1
@@ -97,7 +114,7 @@ print(mein_korpus.fileids())
 ** TODO Aufgabe 3.1
 ** TODO Aufgabe 3.2
 ** TODO Aufgabe 3.3
-* Aufgabenblatt 4
+* [[x-devonthink-item://537D8DEA-84F6-4ABC-B76F-83F119A36FF1][Aufgabenblatt 4]]
 ** DONE Aufgabe 4.1
 
 #+begin_quote
@@ -121,6 +138,20 @@ Ein Test mit Wortstamm ~"impf"~ und einem Text über Corona.
 #+begin_src python
 stamm_erweiterung("impf", mein_korpus.words('corona.txt'))
 #+end_src
+
+*** DONE Überarbeitung als Listenabstraktion
+
+#+begin_src python :results value scalar
+  def finde(wortstamm, liste):
+      return [wort for wort in liste if wortstamm in wort]
+
+  in_ringelnatz = '''Ich wuerde dir ohne Bedenken Eine Kachel aus meinem Ofen Schenken Ich habe dir nichts getan Nun ist mir traurig zu Mut. An den Haengen der Eisenbahn Leuchtet der Ginster so gut. Vorbei - verjaehrt - Doch nimmer vergessen. Ich reise. Alles, was lange waehrt, Ist leise. Die Zeit entstellt Alle Lebewesen. Ein Hund bellt. Er kann nicht lesen. Er kann nicht schreiben. Wir koennen nicht bleiben. Ich lache. Die Loecher sind die Hauptsache An einem Sieb. Ich habe dich so lieb.'''.split(" ")
+
+  return finde("ei", in_ringelnatz)
+#+end_src
+
+#+RESULTS:
+: ['meinem', 'Vorbei', 'reise.', 'leise.', 'Zeit', 'schreiben.', 'bleiben.', 'einem']
 
 ** DONE Aufgabe 4.2
 
@@ -225,5 +256,82 @@ inhaltswoerter(mein_korpus.words('turk.txt'), "turkish" , 5)
 inhaltswoerter(mein_korpus)
 #+end_src
 
-* Aufgabenblatt 5
-** TODO Aufgabe 5.1
+* [[x-devonthink-item://EB57F4A9-620C-47A0-8B19-197C70B903AA][Aufgabenblatt 5]]
+** Referenzen
+
++ [[x-devonthink-item://222B5E94-E9D0-4664-AE94-4684FE5224B5?page=1][Folien 06 POS-Tagging]]
++ [[x-devonthink-item://222B5E94-E9D0-4664-AE94-4684FE5224B5?page=35][Seite 35 Tagger im NLTK]] 
++ [[x-devonthink-item://881B9A2A-0A3A-4338-B9A5-B8495AACDA6F?time=1442.902689][Vorlesungsvideo]]
+
+** TODO COMMENT Aufgabe 5.1
+
+#+begin_quote
+Entwickeln Sie einen RegExTagger für das Deutsche. Orientieren Sie sich dabei an dem in NLTK für das Englische enthaltenen Tagger. Testen Sie Ihn und beschreiben Sie die erzielten Resultate.
+#+end_quote
+
+#+name: English Tagger
+#+begin_src python :results value scalar
+  import os
+  import re
+  import nltk
+  import numpy
+  import HanTa
+  import matplotlib
+
+  from nltk.corpus import brown
+  brown_ts = brown.tagged_sents(categories="news")
+  brown_s = brown.sents(categories="news")
+
+  # print(brown_ts)
+
+  tags = [tag for (word, tag) in brown.tagged_words(categories="news")]
+
+  print(nltk.FreqDist(tags).max())
+
+  tokens = nltk.word_tokenize("This is my sentence and i do not care!")
+
+  default_tagger = nltk.DefaultTagger("NN")
+
+  print(default_tagger.tag(tokens))
+
+  print(default_tagger.evaluate(brown_ts))
+
+  patterns = [(r'.*ing$', 'VBG'), (r'.*ed$', 'VBD'), (r'.*es$', 'VBZ'), (r'.*ould$', 'MD'), (r'.*\'s$', 'NN$'), (r'.*s$', 'NNS'), (r'^-?[0-9]+(.[0-9]+)?$', 'CD'), (r'.*', 'NN')]
+
+  re_tagger = nltk.RegexpTagger(patterns)
+
+  print(re_tagger.evaluate(brown_ts))
+
+  fd = nltk.FreqDist(brown.words(categories="news"))
+  cfd = nltk.ConditionalFreqDist(brown.tagged_words(categories="news"))
+  most_frequent_words = fd.most_common(500)
+  likely_tags = dict((word, cfd[word].max()) for (word, _) in most_frequent_words)
+
+  based_tagger = nltk.UnigramTagger(model=likely_tags, backoff=re_tagger)
+  print(based_tagger.evaluate(brown_ts))
+#+end_src
+
+#+begin_src python
+  import nltk
+  from nltk.corpus import udhr
+
+  menschenrechte = udhr.words("German_Deutsch-Latin1")
+  menschenrechte_liste = list(menschenrechte)
+
+  standart_tagger = nltk.DefaultTagger("NN")
+
+  regechse = [(r'[A-Z][a-zßäöü]+','NN'),(r'[\wäöüß]+(isch|ich|at+|am|ind|nt|igt|ent|ig|bar|nd|iv|los|haft|izt|voll|är|al|el+|iert|ie?l|ös|ft|frei|fach|rt)','ADJA'),(r'[\wäöüß]+(e|l|r)n','VVINF'),(r'd[er|ie|as]{2}','ART')] # Eine Liste voller Tupel mit RegEx und Tags
+
+  re_tagger = nltk.RegexpTagger(regechse, backoff=standart_tagger)
+
+  menschenrechte_tagged = re_tagger.tag(menschenrechte)
+
+  root = '/Users/jeldo/Repositories/Algorithmische-Methoden/data/german_pos'
+  fileid = 'tiger.conll09'
+  columntypes = ['ignore', 'words', 'ignore', 'ignore', 'pos']
+  corp = nltk.corpus.ConllCorpusReader(root, fileid, columntypes, encoding='utf8')
+
+  german_ts = corp.tagged_sents()
+
+  print(re_tagger.evaluate(german_ts))
+#+end_src
